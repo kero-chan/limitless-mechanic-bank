@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/kero-chan/limitless-mechanic-bank/main/schemas/mechanic.schema.json",
+  "title": "Mechanic",
+  "description": "Compositional grammar node for a single slot game mechanic. Consumed by Chris's AI orchestrator.",
+  "type": "object",
+  "required": ["id", "layer", "generic_name", "ports", "math", "presentation", "legal", "evidence", "confidence"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^M-[A-Z]+(-[A-Z]+)*-[0-9]{3}$",
+      "description": "Canonical ID. Example: M-CASCADE-AVALANCHE-001"
+    },
+    "layer": {
+      "type": "string",
+      "enum": ["A", "B", "C", "D", "E"],
+      "description": "A=reel/grid primitive, B=win modifier, C=trigger/state, D=math envelope, E=presentation"
+    },
+    "generic_name": { "type": "string" },
+    "description": { "type": "string" },
+    "ports": {
+      "type": "object",
+      "required": ["inputs", "outputs"],
+      "properties": {
+        "inputs":  { "type": "array", "items": { "type": "string" } },
+        "outputs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "compose": {
+      "type": "object",
+      "properties": {
+        "requires":    { "type": "array", "items": { "type": "string" } },
+        "incompatible":{ "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Free-form parameter schema per mechanic"
+    },
+    "math": {
+      "type": "object",
+      "required": ["rtp_contribution", "vol_shift", "hit_freq_delta"],
+      "properties": {
+        "rtp_contribution":  { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "vol_shift":         { "type": "integer", "minimum": -2, "maximum": 2 },
+        "hit_freq_delta":    { "type": "number" },
+        "max_win_interaction": { "type": "string", "enum": ["additive", "multiplicative", "replacing", "none"] },
+        "distribution_shape":  { "type": "string", "enum": ["long_tail", "clumped", "uniform", "bimodal"] }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "properties": {
+        "anticipation_window_ms": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
+        "audio_cue_family": { "type": "string", "enum": ["rising_tension", "win_release", "near_miss_pause", "bonus_summon"] },
+        "animation_timing_ms": { "type": "object" }
+      }
+    },
+    "legal": {
+      "type": "object",
+      "required": ["tm_safe"],
+      "properties": {
+        "tm_safe":      { "type": "boolean" },
+        "tm_conflicts": { "type": "array", "items": { "type": "string" } },
+        "patent_notes": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "weight"],
+        "properties": {
+          "source":     { "type": "string" },
+          "url":        { "type": "string", "format": "uri" },
+          "weight":     { "type": "number", "minimum": 0, "maximum": 1 },
+          "reviewer":   { "type": "string" },
+          "review_date":{ "type": "string", "format": "date" }
+        }
+      }
+    },
+    "confidence":    { "type": "number", "minimum": 0, "maximum": 1 },
+    "rubric_score":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "tier":          { "type": "string", "enum": ["S", "A", "B", "C"] },
+    "do_not_recommend": { "type": "boolean" },
+    "exemplars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "game":     { "type": "string" },
+          "provider": { "type": "string" },
+          "video_url":{ "type": "string", "format": "uri" },
+          "timestamp_ms_range": { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 }
+        }
+      }
+    }
+  }
+}
